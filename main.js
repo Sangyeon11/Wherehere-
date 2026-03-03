@@ -171,6 +171,11 @@ function getLoginRedirectUri() {
   );
 }
 
+function getAppBaseUrl() {
+  const configured = window.WHEREHERE_CONFIG && window.WHEREHERE_CONFIG.appBaseUrl;
+  return configured || (window.location.origin + "/");
+}
+
 function parseLoginResponse() {
   const params = new URLSearchParams(window.location.search);
   return {
@@ -353,7 +358,7 @@ function renderFeed() {
         ${post.place_name ? `<p class="review-line">연결 장소: ${escapeHtml(post.place_name)}</p>` : ""}
         <div class="post-actions">
           <button class="chip-button" data-share-post="${post.id}" type="button">카카오 공유</button>
-          <button class="chip-button" data-copy-post="${post.id}" type="button">인스타 문구</button>
+          <button class="chip-button" data-copy-post="${post.id}" type="button">인스타 공유</button>
         </div>
         <div class="comments-wrap">
           ${commentsHtml}
@@ -389,7 +394,8 @@ function createPlaceShareText() {
     "[WHEREHERE 오늘의 장소]",
     state.currentPlace.place_name,
     state.currentPlace.road_address_name || state.currentPlace.address_name || "",
-    buildKakaoMapLink(state.currentPlace)
+    buildKakaoMapLink(state.currentPlace),
+    getAppBaseUrl()
   ].filter(Boolean).join("\n");
 }
 
@@ -399,7 +405,8 @@ function createInstagramCaption(post) {
     post.title,
     post.body,
     post.place_name ? "장소: " + post.place_name : "",
-    "#동네생활 #wherehere #로컬피드"
+    "#동네생활 #wherehere #로컬피드",
+    getAppBaseUrl()
   ].filter(Boolean).join("\n");
 }
 
@@ -424,7 +431,31 @@ async function shareText(text) {
   await copyToClipboard(text, "공유 문구를 복사했습니다.");
 }
 
-function drawStoryCard(title, body) {
+function loadCardImage(src) {
+  return new Promise((resolve, reject) => {
+    if (!src) {
+      resolve(null);
+      return;
+    }
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("IMAGE_LOAD_FAILED"));
+    image.src = src;
+  });
+}
+
+function roundRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + width, y, x + width, y + height, radius);
+  ctx.arcTo(x + width, y + height, x, y + height, radius);
+  ctx.arcTo(x, y + height, x, y, radius);
+  ctx.arcTo(x, y, x + width, y, radius);
+  ctx.closePath();
+}
+
+async function drawStoryCard(options) {
   const canvas = document.createElement("canvas");
   canvas.width = 1080;
   canvas.height = 1920;
@@ -439,32 +470,78 @@ function drawStoryCard(title, body) {
   ctx.fillStyle = "#f3f7fb";
   ctx.font = "700 54px Outfit";
   ctx.fillText("WHEREHERE", 80, 180);
-  ctx.font = "italic 88px Instrument Serif";
-  wrapCanvasText(ctx, title, 80, 340, 920, 104);
-  ctx.font = "400 42px Outfit";
+
+  let currentY = 260;
+  const image = await loadCardImage(options.imageUrl).catch(() => null);
+  if (image) {
+    ctx.save();
+    roundRect(ctx, 80, currentY, 920, 540, 28);
+    ctx.clip();
+    ctx.drawImage(image, 80, currentY, 920, 540);
+    ctx.restore();
+    currentY += 620;
+  }
+
+  ctx.font = "italic 82px Instrument Serif";
+  const titleLines = wrapCanvasText(ctx, options.title, 80, currentY, 920, 94, 3);
+  currentY += titleLines * 94 + 40;
+
+  ctx.font = "400 40px Outfit";
   ctx.fillStyle = "#b8c6d5";
-  wrapCanvasText(ctx, body, 80, 760, 900, 64);
+  const bodyLines = wrapCanvasText(ctx, options.body, 80, currentY, 900, 60, 5);
+  currentY += bodyLines * 60 + 24;
+
+  if (options.placeLine) {
+    ctx.fillStyle = "#ffbe5c";
+    ctx.font = "600 34px Outfit";
+    const placeLines = wrapCanvasText(ctx, options.placeLine, 80, currentY, 900, 48, 2);
+    currentY += placeLines * 48 + 32;
+  }
+
+  if (options.commentLines && options.commentLines.length) {
+    ctx.fillStyle = "#f3f7fb";
+    ctx.font = "700 30px Outfit";
+    ctx.fillText("실제 댓글", 80, currentY);
+    currentY += 48;
+    ctx.fillStyle = "#b8c6d5";
+    ctx.font = "400 28px Outfit";
+    options.commentLines.slice(0, 2).forEach((line) => {
+      const lines = wrapCanvasText(ctx, "• " + line, 80, currentY, 900, 40, 2);
+      currentY += lines * 40 + 16;
+    });
+  }
+
   ctx.fillStyle = "#ffbe5c";
   ctx.font = "600 38px Outfit";
-  ctx.fillText("오늘의 동네 기록을 공유해보세요", 80, 1680);
+  ctx.fillText("공유하고 인스타그램에서 바로 올려보세요", 80, 1680);
+  ctx.fillStyle = "#f3f7fb";
+  ctx.font = "500 28px Outfit";
+  wrapCanvasText(ctx, getAppBaseUrl(), 80, 1740, 900, 38, 2);
   return canvas;
 }
 
-function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
+function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines = Infinity) {
   const words = String(text).split(" ");
   let line = "";
   let offsetY = y;
+  let count = 0;
   words.forEach((word) => {
+    if (count >= maxLines) return;
     const test = line ? line + " " + word : word;
     if (ctx.measureText(test).width > maxWidth && line) {
       ctx.fillText(line, x, offsetY);
       line = word;
       offsetY += lineHeight;
+      count += 1;
     } else {
       line = test;
     }
   });
-  if (line) ctx.fillText(line, x, offsetY);
+  if (line && count < maxLines) {
+    ctx.fillText(line, x, offsetY);
+    count += 1;
+  }
+  return count;
 }
 
 function downloadCanvas(canvas, filename) {
@@ -474,9 +551,43 @@ function downloadCanvas(canvas, filename) {
   link.click();
 }
 
+function canvasToFile(canvas, filename) {
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        resolve(null);
+        return;
+      }
+      resolve(new File([blob], filename, { type: "image/png" }));
+    }, "image/png");
+  });
+}
+
+async function shareInstagramCard(options, filename, caption) {
+  const canvas = await drawStoryCard(options);
+  const file = await canvasToFile(canvas, filename);
+
+  if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: "WHEREHERE",
+        text: caption
+      });
+      showToast("공유 시트에서 인스타그램을 선택해 공유하세요.");
+      return;
+    } catch {
+    }
+  }
+
+  downloadCanvas(canvas, filename);
+  await copyToClipboard(caption, "카드 저장 완료. 인스타에 바로 올려주세요.");
+}
+
 async function shareViaKakao(post) {
   const title = post ? post.title : state.currentPlace ? state.currentPlace.place_name : "WHEREHERE";
   const description = post ? post.body.slice(0, 90) : createPlaceShareText();
+  const appUrl = getAppBaseUrl();
   if (window.Kakao && window.Kakao.Share) {
     try {
       window.Kakao.Share.sendDefault({
@@ -486,16 +597,16 @@ async function shareViaKakao(post) {
           description,
           imageUrl: "https://via.placeholder.com/600x315.png?text=WHEREHERE",
           link: {
-            mobileWebUrl: window.location.href,
-            webUrl: window.location.href
+            mobileWebUrl: appUrl,
+            webUrl: appUrl
           }
         },
         buttons: [
           {
             title: "WHEREHERE 열기",
             link: {
-              mobileWebUrl: window.location.href,
-              webUrl: window.location.href
+              mobileWebUrl: appUrl,
+              webUrl: appUrl
             }
           }
         ]
@@ -504,7 +615,7 @@ async function shareViaKakao(post) {
     } catch {
     }
   }
-  await shareText([title, description, window.location.href].join("\n"));
+  await shareText([title, description, appUrl].join("\n"));
 }
 
 function loadKakaoAuthSdk(key) {
@@ -766,9 +877,17 @@ async function handlePostAction(button) {
   if (copyId) {
     const post = state.posts.find((item) => String(item.id) === copyId);
     if (post) {
-      const canvas = drawStoryCard(post.title, post.body);
-      downloadCanvas(canvas, "wherehere-story-card.png");
-      await copyToClipboard(createInstagramCaption(post), "스토리 카드 다운로드 및 문구 복사 완료");
+      await shareInstagramCard(
+        {
+          title: post.title,
+          body: post.body,
+          imageUrl: post.image_url || "",
+          placeLine: post.place_name ? "장소: " + post.place_name : "",
+          commentLines: (post.comments || []).map((comment) => comment.author + ": " + comment.body)
+        },
+        "wherehere-post-card.png",
+        createInstagramCaption(post)
+      );
     }
     return;
   }
@@ -849,9 +968,19 @@ function bindEvents() {
   });
 
   el.copyInstagramButton.addEventListener("click", async () => {
-    const canvas = drawStoryCard(state.currentPlace ? state.currentPlace.place_name : "WHEREHERE", createPlaceShareText());
-    downloadCanvas(canvas, "wherehere-place-card.png");
-    await copyToClipboard(createPlaceShareText(), "스토리 카드 다운로드 및 문구 복사 완료");
+    await shareInstagramCard(
+      {
+        title: state.currentPlace ? state.currentPlace.place_name : "WHEREHERE",
+        body: state.currentPlace
+          ? (state.currentPlace.road_address_name || state.currentPlace.address_name || "오늘의 장소를 지금 확인해보세요.")
+          : "오늘의 장소를 지금 확인해보세요.",
+        imageUrl: "",
+        placeLine: state.currentPlace ? "거리: " + formatDistance(state.currentPlace.distance) : "",
+        commentLines: []
+      },
+      "wherehere-place-card.png",
+      createPlaceShareText()
+    );
   });
 }
 

@@ -1,4 +1,5 @@
 window.WHEREHERE_CONFIG = {
   kakaoJavaScriptKey: "1832123f157785b75e5b8b7d8bc04e90",
-  kakaoLoginRedirectUri: "https://wherehere.pages.dev/"
+  kakaoLoginRedirectUri: "https://wherehere.pages.dev/",
+  appBaseUrl: "https://wherehere.pages.dev/"
 };
