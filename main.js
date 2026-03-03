@@ -172,8 +172,12 @@ function getLoginRedirectUri() {
 }
 
 function getAppBaseUrl() {
+  const current = window.location.origin + "/";
+  if (window.location.origin.includes("wherehere.pages.dev")) {
+    return current;
+  }
   const configured = window.WHEREHERE_CONFIG && window.WHEREHERE_CONFIG.appBaseUrl;
-  return configured || (window.location.origin + "/");
+  return configured || current;
 }
 
 function parseLoginResponse() {
