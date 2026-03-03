@@ -3,75 +3,654 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wherehere | 오늘의 장소 추천</title>
+  <title>WHEREHERE — 오늘의 장소</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@300;400&display=swap"
     rel="stylesheet"
   />
-  <link href="./style.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-deep:     #090b0f;
+      --bg-mid:      #0e1118;
+      --bg-card:     rgba(255,255,255,0.035);
+      --bg-card-hov: rgba(255,255,255,0.055);
+      --border:      rgba(255,255,255,0.07);
+      --border-glow: rgba(212,175,96,0.35);
+      --gold:        #d4af60;
+      --gold-lt:     #e8cc85;
+      --gold-dim:    rgba(212,175,96,0.18);
+      --text-primary:   #f0ece3;
+      --text-secondary: #8c8780;
+      --text-muted:     #4a4742;
+      --accent-r:    #e05c4b;
+      --mono:        'DM Mono', monospace;
+      --serif:       'Playfair Display', serif;
+      --sans:        'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background-color: var(--bg-deep);
+      color: var(--text-primary);
+      min-height: 100dvh;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* ── NOISE OVERLAY ───────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.028;
+      pointer-events: none;
+    }
+
+    /* ── AMBIENT GLOW ────────────────────────────────── */
+    .ambient {
+      position: fixed; z-index: 0; pointer-events: none;
+      border-radius: 50%;
+      filter: blur(120px);
+    }
+    .ambient-1 {
+      width: 600px; height: 600px;
+      top: -200px; left: -150px;
+      background: radial-gradient(circle, rgba(212,175,96,0.06) 0%, transparent 70%);
+      animation: drift1 20s ease-in-out infinite;
+    }
+    .ambient-2 {
+      width: 500px; height: 500px;
+      bottom: -100px; right: -100px;
+      background: radial-gradient(circle, rgba(224,92,75,0.05) 0%, transparent 70%);
+      animation: drift2 25s ease-in-out infinite;
+    }
+    @keyframes drift1 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50%      { transform: translate(60px,40px) scale(1.1); }
+    }
+    @keyframes drift2 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50%      { transform: translate(-40px,-60px) scale(1.08); }
+    }
+
+    /* ── PAGE LAYOUT ─────────────────────────────────── */
+    .page {
+      position: relative; z-index: 1;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── HEADER ──────────────────────────────────────── */
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 32px 0 28px;
+      border-bottom: 1px solid var(--border);
+      animation: fadeDown 0.6s ease both;
+    }
+    .logo {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: 0.3em;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+    .logo span { color: var(--text-muted); }
+    .header-right {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+    }
+
+    /* ── HERO ────────────────────────────────────────── */
+    .hero {
+      padding: 80px 0 64px;
+      animation: fadeDown 0.7s 0.1s ease both;
+    }
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.35em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 32px; height: 1px;
+      background: var(--gold);
+    }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(52px, 8vw, 96px);
+      font-weight: 900;
+      line-height: 0.92;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-bottom: 32px;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--gold);
+    }
+    .hero-body {
+      max-width: 480px;
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--text-secondary);
+      font-weight: 300;
+      margin-bottom: 40px;
+    }
+
+    /* ── STATUS BAR ──────────────────────────────────── */
+    .status-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .status-dot.error { background: var(--accent-r); animation: none; }
+    .status-dot.done  { background: #5ec46a; animation: none; }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.4; transform: scale(0.7); }
+    }
+    #status-text { transition: color 0.3s; }
+
+    /* ── LOGIN STRIP ─────────────────────────────────── */
+    .login-strip {
+      margin-top: 40px;
+      padding: 20px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+    .kakao-login-btn {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 22px;
+      background: #FEE500;
+      color: #191919;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      white-space: nowrap;
+    }
+    .kakao-login-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(254,229,0,0.3);
+    }
+    .kakao-login-btn:disabled {
+      opacity: 0.4; cursor: not-allowed;
+    }
+    .kakao-login-btn svg { flex-shrink: 0; }
+    .login-meta { flex: 1; min-width: 200px; }
+    .login-status {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .login-detail {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      font-family: var(--mono);
+    }
+
+    /* ── DIVIDER ─────────────────────────────────────── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 48px 0 40px;
+      animation: fadeIn 0.6s 0.4s ease both;
+    }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    /* ── MAIN GRID ───────────────────────────────────── */
+    .rec-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+      padding-bottom: 80px;
+      animation: fadeUp 0.7s 0.5s ease both;
+    }
+    @media (max-width: 800px) {
+      .rec-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── PLACE CARD ──────────────────────────────────── */
+    .place-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      transition: border-color 0.4s;
+    }
+    .place-card.loaded { border-color: var(--border-glow); }
+
+    .card-header {
+      padding: 28px 32px 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .card-topline {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .section-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.35em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .date-text {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+    }
+    .place-tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      padding: 5px 12px;
+      background: var(--gold-dim);
+      border: 1px solid rgba(212,175,96,0.2);
+      border-radius: 20px;
+      color: var(--gold-lt);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .card-body { padding: 24px 32px 32px; }
+
+    #place-name {
+      font-family: var(--serif);
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin: 16px 0 14px;
+    }
+    #place-summary {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      font-weight: 300;
+      margin-bottom: 28px;
+      max-width: 480px;
+    }
+
+    .place-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 22px;
+      background: var(--gold);
+      color: #0a0803;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.15s;
+      margin-bottom: 32px;
+    }
+    .place-link-btn:hover {
+      background: var(--gold-lt);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(212,175,96,0.25);
+    }
+    .place-link-btn[aria-disabled="true"] {
+      background: rgba(255,255,255,0.08);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .place-link-btn svg { flex-shrink: 0; }
+
+    /* ── DETAIL GRID ─────────────────────────────────── */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .detail-item {
+      background: var(--bg-deep);
+      padding: 16px 18px;
+      transition: background 0.2s;
+    }
+    .detail-item:hover { background: var(--bg-mid); }
+    .detail-item span {
+      display: block;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .detail-item strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+
+    /* ── GUIDE CARD ──────────────────────────────────── */
+    .guide-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 28px 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      height: fit-content;
+    }
+    .guide-card h3 {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+    .tip-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .tip-list li {
+      position: relative;
+      padding: 16px 0 16px 20px;
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--text-secondary);
+      font-weight: 300;
+      border-bottom: 1px solid var(--border);
+    }
+    .tip-list li:last-child { border-bottom: none; }
+    .tip-list li::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 24px;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      opacity: 0.6;
+    }
+
+    /* ── SKELETON SHIMMER ────────────────────────────── */
+    .skeleton {
+      background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0.04) 0%,
+        rgba(255,255,255,0.08) 50%,
+        rgba(255,255,255,0.04) 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.6s ease-in-out infinite;
+      border-radius: 6px;
+      height: 1em;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── LOADING OVERLAY ─────────────────────────────── */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 80px 32px;
+      text-align: center;
+    }
+    .compass {
+      width: 56px; height: 56px;
+      position: relative;
+    }
+    .compass-ring {
+      width: 56px; height: 56px;
+      border: 1.5px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 1.2s linear infinite;
+    }
+    .compass-dot {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--text-muted);
+    }
+
+    /* ── FOOTER ──────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      animation: fadeIn 0.6s 0.6s ease both;
+    }
+
+    /* ── ANIMATIONS ──────────────────────────────────── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* ── ARIA-LIVE ────────────────────────────────────── */
+    [aria-live] { outline: none; }
+  </style>
 </head>
 <body>
-  <main class="page-shell">
+  <div class="ambient ambient-1"></div>
+  <div class="ambient ambient-2"></div>
+
+  <div class="page">
+
+    <!-- HEADER -->
+    <header class="site-header">
+      <div class="logo">WHERE<span>—</span>HERE</div>
+      <div class="header-right">POWERED BY KAKAO PLACES</div>
+    </header>
+
+    <!-- HERO -->
     <section class="hero">
-      <p class="eyebrow">WHEREHERE</p>
-      <h1>오늘은 어디로 갈까?</h1>
-      <p class="hero-copy">
-        Kakao Places 기준으로 현재 위치 근처의 실제 장소 한 곳만 추천합니다.
-        오늘은 추상적인 분위기 대신, 바로 찾아갈 수 있는 구체적인 장소명을 보여줍니다.
+      <p class="hero-eyebrow">오늘의 장소 추천</p>
+      <h1>오늘은<br><em>어디로</em><br>갈까?</h1>
+      <p class="hero-body">
+        Kakao Places 기준, 지금 내 위치에서 가장 가까운 장소 한 곳만 골라드립니다.
+        오늘은 고민하지 마세요. 그냥 여기 가세요.
       </p>
-      <p class="status-text" id="status-text">현재 위치와 Kakao Places를 확인하는 중입니다.</p>
+
+      <div class="status-bar">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-text">현재 위치와 Kakao Places를 확인하는 중입니다.</span>
+      </div>
+
+      <!-- LOGIN STRIP -->
       <div class="login-strip">
-        <button class="kakao-login-button" id="kakao-login-button" type="button">카카오 로그인 시작</button>
+        <button class="kakao-login-btn" id="kakao-login-button" type="button" disabled>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M9 1.5C4.86 1.5 1.5 4.14 1.5 7.38c0 2.07 1.35 3.9 3.39 4.95l-.87 3.24c-.06.21.18.39.36.27L8.4 13.44c.2.03.4.04.6.04 4.14 0 7.5-2.64 7.5-5.88S13.14 1.5 9 1.5z" fill="#191919"/>
+          </svg>
+          카카오 로그인
+        </button>
         <div class="login-meta">
           <p class="login-status" id="login-status">카카오 로그인 준비 중입니다.</p>
-          <p class="login-detail" id="login-detail">JavaScript 키와 Redirect URI가 모두 등록되어야 로그인 요청이 동작합니다.</p>
+          <p class="login-detail" id="login-detail">JavaScript 키와 Redirect URI가 등록되어야 로그인이 동작합니다.</p>
         </div>
       </div>
     </section>
 
-    <section class="recommendation-panel" aria-live="polite">
-      <div class="recommendation-card">
-        <div class="card-topline">
-          <p class="section-label">TODAY'S PLACE</p>
-          <p class="date-text" id="date-text"></p>
+    <!-- DIVIDER -->
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span class="divider-label">Today's Pick</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- RECOMMENDATION -->
+    <section class="rec-grid" aria-live="polite" aria-atomic="true">
+
+      <!-- PLACE CARD -->
+      <div class="place-card" id="place-card">
+        <div class="card-header">
+          <div class="card-topline">
+            <p class="section-label">TODAY'S PLACE</p>
+            <p class="date-text" id="date-text">—</p>
+          </div>
+          <p class="place-tag" id="place-tag">—</p>
         </div>
         <div class="card-body">
-          <div>
-            <p class="place-tag" id="place-tag"></p>
+
+          <!-- Loading state (shown by default, hidden when place loaded) -->
+          <div class="loading-state" id="loading-state">
+            <div class="compass">
+              <div class="compass-ring"></div>
+              <div class="compass-dot"></div>
+            </div>
+            <span class="loading-label">장소를 찾고 있습니다</span>
+          </div>
+
+          <!-- Place content (hidden initially) -->
+          <div id="place-content" style="display:none">
             <h2 id="place-name"></h2>
-            <p class="place-summary" id="place-summary"></p>
-            <a class="place-link" id="place-link" href="#" target="_blank" rel="noreferrer">카카오맵에서 보기</a>
+            <p id="place-summary"></p>
+            <a class="place-link-btn" id="place-link" href="#" target="_blank" rel="noreferrer" aria-disabled="true">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M7 1.17L7 12.83M1.17 7H12.83" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              카카오맵에서 바로 열기
+            </a>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span>주소</span>
+                <strong id="place-address">—</strong>
+              </div>
+              <div class="detail-item">
+                <span>현재 위치에서</span>
+                <strong id="place-distance">—</strong>
+              </div>
+              <div class="detail-item">
+                <span>카카오 분류</span>
+                <strong id="place-category">—</strong>
+              </div>
+              <div class="detail-item">
+                <span>연락처</span>
+                <strong id="place-phone">—</strong>
+              </div>
+            </div>
           </div>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <span>주소</span>
-              <strong id="place-address"></strong>
-            </div>
-            <div class="detail-item">
-              <span>현재 위치에서</span>
-              <strong id="place-distance"></strong>
-            </div>
-            <div class="detail-item">
-              <span>카카오 분류</span>
-              <strong id="place-category"></strong>
-            </div>
-            <div class="detail-item">
-              <span>연락처</span>
-              <strong id="place-phone"></strong>
-            </div>
-          </div>
+
         </div>
       </div>
 
-      <aside class="companion-card">
+      <!-- GUIDE CARD -->
+      <aside class="guide-card">
         <p class="section-label">QUICK GUIDE</p>
-        <h3>오늘 이렇게 움직여보세요</h3>
-        <ul id="tip-list"></ul>
+        <h3>오늘 이렇게<br>움직여보세요</h3>
+        <ul class="tip-list" id="tip-list">
+          <li class="skeleton" style="height:48px"></li>
+          <li class="skeleton" style="height:48px; animation-delay:0.2s"></li>
+          <li class="skeleton" style="height:48px; animation-delay:0.4s"></li>
+        </ul>
       </aside>
+
     </section>
-  </main>
+
+    <footer>
+      <span>© WHEREHERE — 오늘의 장소 추천 서비스</span>
+      <span>KAKAO PLACES API · GEOLOCATION</span>
+    </footer>
+
+  </div>
 
   <script defer type="text/javascript" src="./config.js"></script>
   <script defer type="text/javascript" src="./main.js"></script>
