@@ -22,180 +22,195 @@
         <p class="eyebrow">WHEREHERE LOCAL</p>
         <h1 class="brand">오늘의 장소에서 동네 커뮤니티까지</h1>
       </div>
-      <div class="status-pill">
-        <span class="status-dot" id="status-dot"></span>
-        <span id="status-text">동네 상태를 준비하는 중입니다.</span>
+      <div class="topbar-actions">
+        <button class="theme-toggle" id="theme-toggle-button" type="button">라이트 모드</button>
+        <div class="status-pill">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="status-text">동네 상태를 준비하는 중입니다.</span>
+        </div>
       </div>
     </header>
 
-    <section class="hero-grid">
-      <section class="hero-card">
-        <p class="eyebrow">LOCAL SOCIAL APP</p>
-        <h2>당근 동네생활, 카카오톡 모임, 로컬 리뷰를 한 화면에.</h2>
-        <p class="hero-copy">
-          지금 있는 동네를 기준으로 오늘의 장소를 추천하고, 같은 동네 사람들과 후기를 남기고,
-          모임을 만들고, 댓글로 대화를 이어가는 로컬 SNS 형태로 확장했습니다.
-        </p>
-        <div class="hero-actions">
-          <button class="ghost-button" id="share-place-button" type="button">현재 장소 공유</button>
-          <button class="ghost-button" id="copy-instagram-button" type="button">인스타용 문구 복사</button>
-        </div>
+    <nav class="section-tabs" aria-label="서비스 섹션">
+      <button class="tab-button is-active" data-tab-button="overview" type="button">홈</button>
+      <button class="tab-button" data-tab-button="create" type="button">작성</button>
+      <button class="tab-button" data-tab-button="feed" type="button">피드</button>
+    </nav>
+
+    <section class="tab-panel is-active" data-tab-panel="overview">
+      <section class="hero-grid">
+        <section class="hero-card">
+          <p class="eyebrow">LOCAL SOCIAL APP</p>
+          <h2>복잡한 한 페이지 대신, 홈부터 피드까지 흐름을 나눴습니다.</h2>
+          <p class="hero-copy">
+            오늘의 장소, 동네 상태, 게시글 작성, 실제 피드를 한 화면에 몰아두지 않고
+            섹션별로 나눠서 더 읽기 쉽게 정리했습니다. 기능은 그대로 유지됩니다.
+          </p>
+          <div class="hero-actions">
+            <button class="ghost-button" id="share-place-button" type="button">현재 장소 공유</button>
+            <button class="ghost-button" id="copy-instagram-button" type="button">인스타용 문구 복사</button>
+          </div>
+        </section>
+
+        <aside class="auth-card">
+          <div class="auth-head">
+            <p class="eyebrow">KAKAO ID</p>
+            <span class="tiny-pill" id="profile-chip">로그인 대기</span>
+          </div>
+          <button class="kakao-login-btn" id="kakao-login-button" type="button" disabled>카카오 로그인 준비 중</button>
+          <p class="auth-status" id="login-status">카카오 인증 상태를 확인하는 중입니다.</p>
+          <p class="auth-detail" id="login-detail">로그인 후 작성한 게시글과 댓글의 작성자명이 카카오 프로필 기준으로 채워집니다.</p>
+          <div class="profile-box">
+            <strong id="profile-name">게스트 모드</strong>
+            <span id="profile-meta">동네 피드는 로그인 없이도 미리 볼 수 있습니다.</span>
+          </div>
+        </aside>
       </section>
 
-      <aside class="auth-card">
-        <div class="auth-head">
-          <p class="eyebrow">KAKAO ID</p>
-          <span class="tiny-pill" id="profile-chip">로그인 대기</span>
-        </div>
-        <button class="kakao-login-btn" id="kakao-login-button" type="button" disabled>카카오 로그인 준비 중</button>
-        <p class="auth-status" id="login-status">카카오 인증 상태를 확인하는 중입니다.</p>
-        <p class="auth-detail" id="login-detail">로그인 후 작성한 게시글과 댓글의 작성자명이 카카오 프로필 기준으로 채워집니다.</p>
-        <div class="profile-box">
-          <strong id="profile-name">게스트 모드</strong>
-          <span id="profile-meta">동네 피드는 로그인 없이도 미리 볼 수 있습니다.</span>
-        </div>
-      </aside>
+      <section class="dashboard-grid">
+        <article class="panel place-panel">
+          <div class="panel-head">
+            <p class="eyebrow">TODAY'S PLACE</p>
+            <p class="date-label" id="date-text"></p>
+          </div>
+          <div class="panel-body">
+            <p class="place-badge" id="place-tag"></p>
+            <h3 id="place-name">주변 장소를 찾는 중입니다.</h3>
+            <p class="place-copy" id="place-summary">현재 위치 기반으로 오늘의 장소를 가져오고 있습니다.</p>
+            <div class="detail-grid">
+              <div class="detail-card">
+                <span>주소</span>
+                <strong id="place-address">-</strong>
+              </div>
+              <div class="detail-card">
+                <span>현재 위치에서</span>
+                <strong id="place-distance">-</strong>
+              </div>
+              <div class="detail-card">
+                <span>카테고리</span>
+                <strong id="place-category">-</strong>
+              </div>
+              <div class="detail-card">
+                <span>연락처</span>
+                <strong id="place-phone">-</strong>
+              </div>
+            </div>
+            <a class="primary-link" id="place-link" href="#" target="_blank" rel="noreferrer">카카오맵에서 열기</a>
+          </div>
+        </article>
+
+        <article class="panel area-panel">
+          <div class="panel-head">
+            <p class="eyebrow">NEIGHBORHOOD PULSE</p>
+            <span class="tiny-pill" id="local-area">동네 확인 중</span>
+          </div>
+          <h3 id="area-title">내 주변 사람들과 바로 이어지는 로컬 피드</h3>
+          <p class="area-copy" id="area-summary">주변 장소가 확정되면 동네 이름과 함께 로컬 피드 상태를 요약해 보여줍니다.</p>
+          <div class="metric-grid">
+            <div class="metric-card">
+              <span>오늘 게시글</span>
+              <strong id="metric-posts">0</strong>
+            </div>
+            <div class="metric-card">
+              <span>열린 모임</span>
+              <strong id="metric-gatherings">0</strong>
+            </div>
+            <div class="metric-card">
+              <span>리뷰 평균</span>
+              <strong id="metric-rating">0.0</strong>
+            </div>
+            <div class="metric-card">
+              <span>활성 댓글</span>
+              <strong id="metric-comments">0</strong>
+            </div>
+          </div>
+        </article>
+      </section>
     </section>
 
-    <section class="dashboard-grid">
-      <article class="panel place-panel">
-        <div class="panel-head">
-          <p class="eyebrow">TODAY'S PLACE</p>
-          <p class="date-label" id="date-text"></p>
-        </div>
-        <div class="panel-body">
-          <p class="place-badge" id="place-tag"></p>
-          <h3 id="place-name">주변 장소를 찾는 중입니다.</h3>
-          <p class="place-copy" id="place-summary">현재 위치 기반으로 오늘의 장소를 가져오고 있습니다.</p>
-          <div class="detail-grid">
-            <div class="detail-card">
-              <span>주소</span>
-              <strong id="place-address">-</strong>
-            </div>
-            <div class="detail-card">
-              <span>현재 위치에서</span>
-              <strong id="place-distance">-</strong>
-            </div>
-            <div class="detail-card">
-              <span>카테고리</span>
-              <strong id="place-category">-</strong>
-            </div>
-            <div class="detail-card">
-              <span>연락처</span>
-              <strong id="place-phone">-</strong>
-            </div>
+    <section class="tab-panel" data-tab-panel="create">
+      <section class="compose-grid">
+        <article class="panel compose-panel">
+          <div class="panel-head">
+            <p class="eyebrow">CREATE POST</p>
+            <span class="tiny-pill">로컬 SNS 작성</span>
           </div>
-          <a class="primary-link" id="place-link" href="#" target="_blank" rel="noreferrer">카카오맵에서 열기</a>
-        </div>
-      </article>
+          <form id="post-form" class="composer-form">
+            <div class="field-row">
+              <label>
+                <span>글 타입</span>
+                <select id="post-type">
+                  <option value="story">동네 이야기</option>
+                  <option value="review">장소 리뷰</option>
+                  <option value="gathering">모임 모집</option>
+                </select>
+              </label>
+              <label>
+                <span>리뷰 별점</span>
+                <select id="post-rating">
+                  <option value="0">리뷰 아님</option>
+                  <option value="5">5점</option>
+                  <option value="4">4점</option>
+                  <option value="3">3점</option>
+                  <option value="2">2점</option>
+                  <option value="1">1점</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              <span>제목</span>
+              <input id="post-title" type="text" maxlength="80" placeholder="예: 오늘 저녁 근처에서 같이 달릴 사람?" required />
+            </label>
+            <label>
+              <span>내용</span>
+              <textarea id="post-body" rows="5" maxlength="600" placeholder="동네 정보, 리뷰, 모임 공지, 후기 등을 자유롭게 적어보세요." required></textarea>
+            </label>
+            <div class="field-row">
+              <label>
+                <span>모임 시간</span>
+                <input id="post-time" type="text" maxlength="40" placeholder="예: 오늘 8시 / 토요일 오전 10시" />
+              </label>
+              <label>
+                <span>사진 업로드</span>
+                <input id="photo-input" type="file" accept="image/*" />
+              </label>
+            </div>
+            <div class="photo-preview-wrap" id="photo-preview-wrap" hidden>
+              <img id="photo-preview" alt="업로드 미리보기" />
+              <button class="text-button" id="clear-photo-button" type="button">사진 제거</button>
+            </div>
+            <button class="submit-button" id="create-post-button" type="submit">동네 피드에 올리기</button>
+          </form>
+        </article>
 
-      <article class="panel area-panel">
-        <div class="panel-head">
-          <p class="eyebrow">NEIGHBORHOOD PULSE</p>
-          <span class="tiny-pill" id="local-area">동네 확인 중</span>
-        </div>
-        <h3 id="area-title">내 주변 사람들과 바로 이어지는 로컬 피드</h3>
-        <p class="area-copy" id="area-summary">주변 장소가 확정되면 동네 이름과 함께 로컬 피드 상태를 요약해 보여줍니다.</p>
-        <div class="metric-grid">
-          <div class="metric-card">
-            <span>오늘 게시글</span>
-            <strong id="metric-posts">0</strong>
+        <aside class="panel side-panel">
+          <div class="panel-head">
+            <p class="eyebrow">LIVE BOARD</p>
+            <span class="tiny-pill">실시간 요약</span>
           </div>
-          <div class="metric-card">
-            <span>열린 모임</span>
-            <strong id="metric-gatherings">0</strong>
-          </div>
-          <div class="metric-card">
-            <span>리뷰 평균</span>
-            <strong id="metric-rating">0.0</strong>
-          </div>
-          <div class="metric-card">
-            <span>활성 댓글</span>
-            <strong id="metric-comments">0</strong>
-          </div>
-        </div>
-      </article>
+          <section class="mini-section">
+            <h3>열린 모임</h3>
+            <div id="gathering-list" class="mini-list"></div>
+          </section>
+          <section class="mini-section">
+            <h3>주목받는 리뷰</h3>
+            <div id="review-list" class="mini-list"></div>
+          </section>
+        </aside>
+      </section>
     </section>
 
-    <section class="compose-grid">
-      <article class="panel compose-panel">
-        <div class="panel-head">
-          <p class="eyebrow">CREATE POST</p>
-          <span class="tiny-pill">로컬 SNS 작성</span>
-        </div>
-        <form id="post-form" class="composer-form">
-          <div class="field-row">
-            <label>
-              <span>글 타입</span>
-              <select id="post-type">
-                <option value="story">동네 이야기</option>
-                <option value="review">장소 리뷰</option>
-                <option value="gathering">모임 모집</option>
-              </select>
-            </label>
-            <label>
-              <span>리뷰 별점</span>
-              <select id="post-rating">
-                <option value="0">리뷰 아님</option>
-                <option value="5">5점</option>
-                <option value="4">4점</option>
-                <option value="3">3점</option>
-                <option value="2">2점</option>
-                <option value="1">1점</option>
-              </select>
-            </label>
+    <section class="tab-panel" data-tab-panel="feed">
+      <section class="feed-section">
+        <div class="feed-head">
+          <div>
+            <p class="eyebrow">NEIGHBOR FEED</p>
+            <h2>동네 생활 피드</h2>
           </div>
-          <label>
-            <span>제목</span>
-            <input id="post-title" type="text" maxlength="80" placeholder="예: 오늘 저녁 근처에서 같이 달릴 사람?" required />
-          </label>
-          <label>
-            <span>내용</span>
-            <textarea id="post-body" rows="5" maxlength="600" placeholder="동네 정보, 리뷰, 모임 공지, 후기 등을 자유롭게 적어보세요." required></textarea>
-          </label>
-          <div class="field-row">
-            <label>
-              <span>모임 시간</span>
-              <input id="post-time" type="text" maxlength="40" placeholder="예: 오늘 8시 / 토요일 오전 10시" />
-            </label>
-            <label>
-              <span>사진 업로드</span>
-              <input id="photo-input" type="file" accept="image/*" />
-            </label>
-          </div>
-          <div class="photo-preview-wrap" id="photo-preview-wrap" hidden>
-            <img id="photo-preview" alt="업로드 미리보기" />
-            <button class="text-button" id="clear-photo-button" type="button">사진 제거</button>
-          </div>
-          <button class="submit-button" id="create-post-button" type="submit">동네 피드에 올리기</button>
-        </form>
-      </article>
-
-      <aside class="panel side-panel">
-        <div class="panel-head">
-          <p class="eyebrow">LIVE BOARD</p>
-          <span class="tiny-pill">실시간 요약</span>
+          <span class="tiny-pill" id="feed-summary">0개 게시글</span>
         </div>
-        <section class="mini-section">
-          <h3>열린 모임</h3>
-          <div id="gathering-list" class="mini-list"></div>
-        </section>
-        <section class="mini-section">
-          <h3>주목받는 리뷰</h3>
-          <div id="review-list" class="mini-list"></div>
-        </section>
-      </aside>
-    </section>
-
-    <section class="feed-section">
-      <div class="feed-head">
-        <div>
-          <p class="eyebrow">NEIGHBOR FEED</p>
-          <h2>동네 생활 피드</h2>
-        </div>
-        <span class="tiny-pill" id="feed-summary">0개 게시글</span>
-      </div>
-      <div class="feed-list" id="feed-list"></div>
+        <div class="feed-list" id="feed-list"></div>
+      </section>
     </section>
   </main>
 
