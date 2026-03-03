@@ -85,16 +85,7 @@ const PLACES = [
   }
 ];
 
-const FILTERS = ["전체", "실내", "야외", "감성", "맛집"];
-
-const state = {
-  activeFilter: "전체",
-  rerollCount: 0
-};
-
 const elements = {
-  filterGrid: document.querySelector("#filter-grid"),
-  rerollButton: document.querySelector("#reroll-button"),
   dateText: document.querySelector("#date-text"),
   placeTag: document.querySelector("#place-tag"),
   placeName: document.querySelector("#place-name"),
@@ -106,14 +97,6 @@ const elements = {
   tipList: document.querySelector("#tip-list")
 };
 
-function getFilteredPlaces() {
-  if (state.activeFilter === "전체") {
-    return PLACES;
-  }
-
-  return PLACES.filter((place) => place.category === state.activeFilter);
-}
-
 function getTodaySeed() {
   const now = new Date();
 
@@ -121,10 +104,9 @@ function getTodaySeed() {
 }
 
 function selectPlace() {
-  const picks = getFilteredPlaces();
-  const index = (getTodaySeed() + state.rerollCount) % picks.length;
+  const index = getTodaySeed() % PLACES.length;
 
-  return picks[index];
+  return PLACES[index];
 }
 
 function renderTips(tips) {
@@ -157,34 +139,4 @@ function renderRecommendation() {
   renderTips(pick.tips);
 }
 
-function renderFilters() {
-  elements.filterGrid.innerHTML = "";
-
-  FILTERS.forEach((filterName) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "filter-button";
-    button.textContent = filterName;
-
-    if (filterName === state.activeFilter) {
-      button.classList.add("is-active");
-    }
-
-    button.addEventListener("click", () => {
-      state.activeFilter = filterName;
-      state.rerollCount = 0;
-      renderFilters();
-      renderRecommendation();
-    });
-
-    elements.filterGrid.appendChild(button);
-  });
-}
-
-elements.rerollButton.addEventListener("click", () => {
-  state.rerollCount += 1;
-  renderRecommendation();
-});
-
-renderFilters();
 renderRecommendation();
