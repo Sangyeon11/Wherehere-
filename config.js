@@ -1,3 +1,3 @@
 window.WHEREHERE_CONFIG = {
-  kakaoJavaScriptKey: ""
+  kakaoJavaScriptKey: "1832123f157785b75e5b8b7d8bc04e90"
 };
