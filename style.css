@@ -278,6 +278,19 @@ a {
   margin-top: 18px;
 }
 
+.share-debug-line {
+  margin: 12px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.share-debug-link {
+  color: var(--accent-2);
+  font-weight: 700;
+  word-break: break-all;
+}
+
 .kakao-login-btn {
   margin-top: 14px;
   width: 100%;

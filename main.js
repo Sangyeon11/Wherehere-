@@ -54,6 +54,7 @@ const el = {
   feedSummary: document.querySelector("#feed-summary"),
   sharePlaceButton: document.querySelector("#share-place-button"),
   copyInstagramButton: document.querySelector("#copy-instagram-button"),
+  shareDebugUrl: document.querySelector("#share-debug-url"),
   toast: document.querySelector("#toast")
 };
 
@@ -178,6 +179,13 @@ function getAppBaseUrl() {
   }
   const configured = window.WHEREHERE_CONFIG && window.WHEREHERE_CONFIG.appBaseUrl;
   return configured || current;
+}
+
+function updateShareDebugUrl() {
+  if (!el.shareDebugUrl) return;
+  const appUrl = getAppBaseUrl();
+  el.shareDebugUrl.textContent = appUrl;
+  el.shareDebugUrl.href = appUrl;
 }
 
 function parseLoginResponse() {
@@ -592,6 +600,7 @@ async function shareViaKakao(post) {
   const title = post ? post.title : state.currentPlace ? state.currentPlace.place_name : "WHEREHERE";
   const description = post ? post.body.slice(0, 90) : createPlaceShareText();
   const appUrl = getAppBaseUrl();
+  updateShareDebugUrl();
   if (window.Kakao && window.Kakao.Share) {
     try {
       window.Kakao.Share.sendDefault({
@@ -1006,6 +1015,7 @@ async function initialize() {
 
   initializeTheme();
   renderDate();
+  updateShareDebugUrl();
   setProfile(loadSessionUser());
   bindEvents();
   await refreshFeed();
