@@ -57,6 +57,14 @@ const elements = {
   tipList: document.querySelector("#tip-list")
 };
 
+function createDiagnosticError(code, title, message, tips) {
+  const error = new Error(message);
+  error.code = code;
+  error.title = title;
+  error.tips = tips;
+  return error;
+}
+
 function getTodaySeed() {
   const now = new Date();
 
@@ -88,23 +96,19 @@ function renderDate() {
   });
 }
 
-function renderSetupState(message) {
+function renderDiagnosticState(title, message, tips) {
   renderDate();
   elements.placeTag.textContent = "KAKAO SETUP";
-  elements.placeName.textContent = "Kakao JavaScript 키가 필요합니다";
+  elements.placeName.textContent = title;
   elements.placeSummary.textContent = message;
-  elements.placeAddress.textContent = "config.js의 kakaoJavaScriptKey";
-  elements.placeDistance.textContent = "설정 후 자동 계산";
-  elements.placeCategory.textContent = "Kakao Places";
-  elements.placePhone.textContent = "키 설정 필요";
+  elements.placeAddress.textContent = "오류 상태";
+  elements.placeDistance.textContent = "자동 추천 중단";
+  elements.placeCategory.textContent = "진단 필요";
+  elements.placePhone.textContent = "브라우저 콘솔도 확인";
   elements.placeLink.removeAttribute("href");
   elements.placeLink.setAttribute("aria-disabled", "true");
-  elements.placeLink.textContent = "config.js에 키를 넣어주세요";
-  renderTips([
-    "Kakao Developers에서 JavaScript 키를 발급받아야 합니다.",
-    "config.js의 kakaoJavaScriptKey 값에 키를 넣으면 됩니다.",
-    "키를 넣은 뒤 페이지를 새로고침하면 근처 실제 장소 1곳을 찾습니다."
-  ]);
+  elements.placeLink.textContent = "오류 내용을 확인해주세요";
+  renderTips(tips);
   setStatus(message);
 }
 
@@ -121,10 +125,55 @@ function loadKakaoSdk(key) {
       encodeURIComponent(key) +
       "&autoload=false&libraries=services";
     script.onload = () => {
-      window.kakao.maps.load(resolve);
+      if (!window.kakao || !window.kakao.maps) {
+        reject(
+          createDiagnosticError(
+            "KAKAO_SDK_INVALID",
+            "Kakao SDK 초기화 실패",
+            "스크립트는 내려왔지만 Kakao 객체가 생성되지 않았습니다. JavaScript 키가 잘못됐거나, 등록한 플랫폼 도메인이 현재 사이트와 다를 수 있습니다.",
+            [
+              "Kakao Developers의 앱 키에서 JavaScript 키가 현재 값과 정확히 일치하는지 확인하세요.",
+              "플랫폼 > Web에 https://sangyeon11.github.io 가 등록되어 있는지 다시 확인하세요.",
+              "브라우저 강력 새로고침 후 다시 시도하세요."
+            ]
+          )
+        );
+        return;
+      }
+
+      window.kakao.maps.load(() => {
+        if (!window.kakao.maps.services) {
+          reject(
+            createDiagnosticError(
+              "KAKAO_SERVICE_MISSING",
+              "Kakao Places 라이브러리 로드 실패",
+              "Kakao Maps는 로드됐지만 Places 서비스 객체가 없습니다. SDK URL의 libraries=services 로드가 실패했을 수 있습니다.",
+              [
+                "브라우저 확장 프로그램이 dapi.kakao.com 요청을 막는지 확인하세요.",
+                "시크릿 모드나 다른 브라우저에서 다시 열어보세요.",
+                "강력 새로고침 후 다시 확인하세요."
+              ]
+            )
+          );
+          return;
+        }
+
+        resolve();
+      });
     };
     script.onerror = () => {
-      reject(new Error("Kakao SDK를 불러오지 못했습니다."));
+      reject(
+        createDiagnosticError(
+          "KAKAO_SDK_LOAD_FAILED",
+          "Kakao SDK 다운로드 실패",
+          "https://dapi.kakao.com 의 SDK 스크립트를 내려받지 못했습니다. 잘못된 JavaScript 키, 플랫폼 도메인 불일치, 네트워크 차단이 대표 원인입니다.",
+          [
+            "Kakao Developers > 앱 키의 JavaScript 키가 현재 config.js 값과 같은지 확인하세요.",
+            "Kakao Developers > 플랫폼 > Web에 https://sangyeon11.github.io 가 등록되어 있는지 확인하세요.",
+            "광고 차단 확장이나 개인정보 보호 확장이 dapi.kakao.com 을 차단하는지 확인하세요."
+          ]
+        )
+      );
     };
     document.head.appendChild(script);
   });
@@ -133,15 +182,75 @@ function loadKakaoSdk(key) {
 function getCurrentPosition() {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
-      reject(new Error("브라우저가 위치 정보를 지원하지 않습니다."));
+      reject(
+        createDiagnosticError(
+          "GEOLOCATION_UNSUPPORTED",
+          "위치 정보 미지원 브라우저",
+          "이 브라우저는 위치 정보를 지원하지 않습니다.",
+          [
+            "Chrome, Edge, Safari 같은 최신 브라우저에서 다시 시도하세요.",
+            "브라우저가 너무 오래됐거나 특수 환경일 수 있습니다.",
+            "다른 브라우저에서 같은 주소를 열어 확인하세요."
+          ]
+        )
+      );
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(resolve, reject, {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 300000
-    });
+    navigator.geolocation.getCurrentPosition(
+      resolve,
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          reject(
+            createDiagnosticError(
+              "GEOLOCATION_DENIED",
+              "위치 권한이 차단되었습니다",
+              "브라우저가 현재 사이트의 위치 접근을 차단했습니다. 주소창 왼쪽 사이트 권한에서 위치를 허용해야 합니다.",
+              [
+                "주소창 왼쪽 아이콘을 눌러 위치 권한을 허용으로 바꾸세요.",
+                "권한을 바꾼 뒤 페이지를 새로고침하세요.",
+                "브라우저가 이미 차단 상태를 기억하고 있으면 팝업이 다시 안 뜰 수 있습니다."
+              ]
+            )
+          );
+          return;
+        }
+
+        if (error.code === error.TIMEOUT) {
+          reject(
+            createDiagnosticError(
+              "GEOLOCATION_TIMEOUT",
+              "위치 확인 시간 초과",
+              "브라우저가 제한 시간 안에 현재 위치를 가져오지 못했습니다.",
+              [
+                "실내나 위치 신호가 약한 환경이면 시간이 더 걸릴 수 있습니다.",
+                "잠시 후 다시 새로고침해 재시도하세요.",
+                "브라우저 위치 서비스가 꺼져 있지 않은지 확인하세요."
+              ]
+            )
+          );
+          return;
+        }
+
+        reject(
+          createDiagnosticError(
+            "GEOLOCATION_FAILED",
+            "위치 정보를 가져오지 못했습니다",
+            "브라우저가 현재 위치를 반환하지 못했습니다.",
+            [
+              "브라우저의 위치 서비스 설정을 확인하세요.",
+              "새로고침 후 다시 시도하세요.",
+              "다른 브라우저에서 같은 주소를 열어 확인하세요."
+            ]
+          )
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000
+      }
+    );
   });
 }
 
@@ -160,7 +269,18 @@ function categorySearch(places, categoryCode, longitude, latitude) {
           return;
         }
 
-        reject(new Error("Kakao Places 검색에 실패했습니다."));
+        reject(
+          createDiagnosticError(
+            "KAKAO_PLACE_SEARCH_FAILED",
+            "Kakao Places 검색 실패",
+            "Kakao Places API가 정상 결과를 돌려주지 않았습니다. 키/도메인 문제이거나 일시적인 응답 오류일 수 있습니다.",
+            [
+              "Kakao Developers의 플랫폼 등록과 JavaScript 키를 다시 확인하세요.",
+              "잠시 후 새로고침해 다시 시도하세요.",
+              "브라우저 콘솔에 추가 에러가 있는지 확인하세요."
+            ]
+          )
+        );
       },
       {
         location: new window.kakao.maps.LatLng(latitude, longitude),
@@ -191,7 +311,16 @@ async function findNearbyPlace(longitude, latitude) {
     };
   }
 
-  throw new Error("주변 3km 안에서 추천할 장소를 찾지 못했습니다.");
+  throw createDiagnosticError(
+    "NO_PLACE_FOUND",
+    "주변 추천 장소 없음",
+    "현재 위치 기준 3km 안에서 오늘의 조건에 맞는 장소를 찾지 못했습니다.",
+    [
+      "위치가 너무 외곽이면 결과가 적을 수 있습니다.",
+      "잠시 후 다시 열면 다른 카테고리 후보가 잡힐 수 있습니다.",
+      "위치를 바꿔 다시 시도해보세요."
+    ]
+  );
 }
 
 function formatDistance(distance) {
@@ -242,7 +371,15 @@ async function initialize() {
   const key = window.WHEREHERE_CONFIG && window.WHEREHERE_CONFIG.kakaoJavaScriptKey;
 
   if (!key) {
-    renderSetupState("config.js에 Kakao JavaScript 키를 입력해야 실제 장소 검색이 동작합니다.");
+    renderDiagnosticState(
+      "Kakao JavaScript 키가 비어 있습니다",
+      "config.js의 kakaoJavaScriptKey 값이 비어 있어 Kakao SDK를 시작할 수 없습니다.",
+      [
+        "config.js 파일의 kakaoJavaScriptKey 값에 JavaScript 키를 넣으세요.",
+        "REST API 키가 아니라 JavaScript 키여야 합니다.",
+        "수정 후 페이지를 새로고침하세요."
+      ]
+    );
     return;
   }
 
@@ -260,7 +397,15 @@ async function initialize() {
 
     renderPlace(recommendation);
   } catch (error) {
-    renderSetupState(error.message);
+    renderDiagnosticState(
+      error.title || "알 수 없는 오류",
+      error.message || "예상하지 못한 오류가 발생했습니다.",
+      error.tips || [
+        "브라우저 강력 새로고침 후 다시 시도하세요.",
+        "Kakao Developers 설정을 다시 확인하세요.",
+        "브라우저 콘솔 메시지도 함께 확인하세요."
+      ]
+    );
   }
 }
 
