@@ -42,9 +42,13 @@ const CATEGORY_ROTATION = [
 ];
 
 const SEARCH_RADIUS_METERS = 3000;
+const KAKAO_AUTH_SDK_URL = "https://t1.kakaocdn.net/kakao_js_sdk/2.7.9/kakao.min.js";
 
 const elements = {
   statusText: document.querySelector("#status-text"),
+  loginButton: document.querySelector("#kakao-login-button"),
+  loginStatus: document.querySelector("#login-status"),
+  loginDetail: document.querySelector("#login-detail"),
   dateText: document.querySelector("#date-text"),
   placeTag: document.querySelector("#place-tag"),
   placeName: document.querySelector("#place-name"),
@@ -73,6 +77,12 @@ function getTodaySeed() {
 
 function setStatus(message) {
   elements.statusText.textContent = message;
+}
+
+function setLoginState(status, detail, isEnabled) {
+  elements.loginStatus.textContent = status;
+  elements.loginDetail.textContent = detail;
+  elements.loginButton.disabled = !isEnabled;
 }
 
 function renderTips(tips) {
@@ -110,6 +120,124 @@ function renderDiagnosticState(title, message, tips) {
   elements.placeLink.textContent = "오류 내용을 확인해주세요";
   renderTips(tips);
   setStatus(message);
+}
+
+function getLoginRedirectUri() {
+  const configuredUri = window.WHEREHERE_CONFIG && window.WHEREHERE_CONFIG.kakaoLoginRedirectUri;
+
+  if (configuredUri) {
+    return configuredUri;
+  }
+
+  return window.location.origin + window.location.pathname;
+}
+
+function parseLoginResponse() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code");
+  const error = params.get("error");
+  const errorDescription = params.get("error_description");
+
+  return {
+    code,
+    error,
+    errorDescription
+  };
+}
+
+function loadKakaoAuthSdk(key) {
+  return new Promise((resolve, reject) => {
+    if (window.Kakao && window.Kakao.Auth) {
+      if (!window.Kakao.isInitialized()) {
+        window.Kakao.init(key);
+      }
+      resolve();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = KAKAO_AUTH_SDK_URL;
+    script.onload = () => {
+      if (!window.Kakao) {
+        reject(
+          createDiagnosticError(
+            "KAKAO_LOGIN_SDK_MISSING",
+            "카카오 로그인 SDK 초기화 실패",
+            "카카오 로그인 SDK 파일은 내려왔지만 window.Kakao 객체가 생성되지 않았습니다.",
+            [
+              "브라우저 확장 프로그램이 스크립트를 변형하는지 확인하세요.",
+              "강력 새로고침 후 다시 시도하세요.",
+              "다른 브라우저에서 같은 페이지를 열어보세요."
+            ]
+          )
+        );
+        return;
+      }
+
+      window.Kakao.init(key);
+      resolve();
+    };
+    script.onerror = () => {
+      reject(
+        createDiagnosticError(
+          "KAKAO_LOGIN_SDK_LOAD_FAILED",
+          "카카오 로그인 SDK 다운로드 실패",
+          "카카오 로그인 SDK를 내려받지 못했습니다. 네트워크 차단이나 브라우저 확장 프로그램이 원인일 수 있습니다.",
+          [
+            "광고 차단 확장 프로그램을 끄고 다시 시도하세요.",
+            "시크릿 모드 또는 다른 브라우저에서 열어보세요.",
+            "잠시 후 다시 새로고침해보세요."
+          ]
+        )
+      );
+    };
+    document.head.appendChild(script);
+  });
+}
+
+async function initializeKakaoLogin(key) {
+  const redirectUri = getLoginRedirectUri();
+  const loginResponse = parseLoginResponse();
+
+  try {
+    await loadKakaoAuthSdk(key);
+
+    elements.loginButton.addEventListener("click", () => {
+      window.Kakao.Auth.authorize({
+        redirectUri
+      });
+    });
+
+    if (loginResponse.code) {
+      setLoginState(
+        "카카오 로그인 인가 코드 수신",
+        "redirect_uri로 인증 코드가 돌아왔습니다. 정적 사이트에서는 여기까지 가능하며, 실제 사용자 세션 생성은 서버에서 토큰 교환이 필요합니다.",
+        true
+      );
+      return;
+    }
+
+    if (loginResponse.error) {
+      setLoginState(
+        "카카오 로그인 응답 오류",
+        (loginResponse.errorDescription || loginResponse.error) + " Redirect URI와 로그인 설정을 다시 확인하세요.",
+        true
+      );
+      return;
+    }
+
+    setLoginState(
+      "카카오 로그인 가능",
+      "현재 Redirect URI: " + redirectUri,
+      true
+    );
+  } catch (error) {
+    setLoginState(
+      error.title || "카카오 로그인 준비 실패",
+      error.message || "카카오 로그인 SDK를 준비하지 못했습니다.",
+      false
+    );
+  }
 }
 
 function loadKakaoSdk(key) {
@@ -371,6 +499,11 @@ async function initialize() {
   const key = window.WHEREHERE_CONFIG && window.WHEREHERE_CONFIG.kakaoJavaScriptKey;
 
   if (!key) {
+    setLoginState(
+      "카카오 로그인 준비 실패",
+      "JavaScript 키가 비어 있어 카카오 로그인 버튼을 활성화할 수 없습니다.",
+      false
+    );
     renderDiagnosticState(
       "Kakao JavaScript 키가 비어 있습니다",
       "config.js의 kakaoJavaScriptKey 값이 비어 있어 Kakao SDK를 시작할 수 없습니다.",
@@ -382,6 +515,8 @@ async function initialize() {
     );
     return;
   }
+
+  initializeKakaoLogin(key);
 
   try {
     setStatus("Kakao Places를 준비하고 있습니다.");
