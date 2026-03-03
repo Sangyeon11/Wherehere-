@@ -1,99 +1,59 @@
-const PLACES = [
+const CATEGORY_ROTATION = [
   {
-    name: "한강 피크닉 존",
-    category: "야외",
-    summary: "가볍게 바람을 쐬고 싶을 때 좋은 선택입니다. 돗자리 하나만 챙겨도 오늘 하루가 훨씬 느긋해집니다.",
-    bestTime: "오후 4시 - 해질녘",
-    goodFor: "답답한 일정, 산책, 리프레시",
-    vibe: "탁 트인, 시원한, 느긋한",
-    highlight: "노을 시간에 만족도가 가장 높아요.",
+    code: "CE7",
+    label: "카페",
+    summary: "오늘은 가까운 카페 한 곳을 바로 찍어드립니다. 오래 고민하지 않고 바로 이동하기 좋은 선택입니다.",
     tips: [
-      "근처 카페에서 음료를 먼저 사서 이동하면 동선이 편합니다.",
-      "해가 진 뒤에는 기온이 떨어질 수 있으니 가벼운 겉옷이 좋습니다.",
-      "짧게 머물러도 기분 전환 효과가 큽니다."
+      "지금 출발하면 가장 빠르게 도착할 수 있는 후보입니다.",
+      "자리가 붐비기 전 짧게 다녀오기 좋습니다.",
+      "이동 동선이 짧아서 오늘 일정 사이에 끼워 넣기 쉽습니다."
     ]
   },
   {
-    name: "조용한 북카페",
-    category: "실내",
-    summary: "생각을 정리하거나 혼자만의 시간을 보내기 좋습니다. 소음이 적고, 오래 앉아 있기 편한 공간을 추천합니다.",
-    bestTime: "오전 11시 - 오후 2시",
-    goodFor: "집중, 혼자만의 시간, 가벼운 독서",
-    vibe: "차분한, 집중되는, 안정적인",
-    highlight: "짧은 독서와 메모를 곁들이면 만족도가 올라갑니다.",
+    code: "FD6",
+    label: "음식점",
+    summary: "오늘은 가까운 식사 장소 한 곳을 추천합니다. 이동 부담이 적고 바로 목적지가 명확한 선택입니다.",
     tips: [
-      "해야 할 일을 한 가지 정해서 가면 시간을 더 잘 씁니다.",
-      "사람이 몰리기 전 점심 이전 방문이 가장 쾌적합니다.",
-      "이어폰보다 책이나 노트를 함께 가져가면 공간 활용도가 높습니다."
+      "식사 시간을 기준으로 바로 들르기 좋습니다.",
+      "멀리 가지 않아도 되는 근거리 후보를 우선으로 잡았습니다.",
+      "오늘 일정 중 가장 단순하게 실행하기 좋은 코스입니다."
     ]
   },
   {
-    name: "동네 전시 공간",
-    category: "감성",
-    summary: "큰 계획 없이도 감각을 환기하기 좋은 코스입니다. 짧은 관람만으로도 분위기 전환이 됩니다.",
-    bestTime: "오후 1시 - 오후 5시",
-    goodFor: "영감, 데이트, 가벼운 외출",
-    vibe: "감각적인, 조용한, 영감이 생기는",
-    highlight: "관람 후 근처 골목 산책까지 묶으면 좋습니다.",
+    code: "CT1",
+    label: "문화시설",
+    summary: "오늘은 근처 문화시설 한 곳을 제안합니다. 짧게 분위기를 바꾸고 싶을 때 적합한 선택입니다.",
     tips: [
-      "관람 시간은 길지 않아도 충분합니다.",
-      "사진 촬영 가능 여부를 먼저 확인하면 동선이 깔끔합니다.",
-      "전시 후 근처 카페 한 곳만 함께 잡아도 하루 완성도가 올라갑니다."
+      "오래 머무르지 않아도 기분 전환이 됩니다.",
+      "근처 카페나 산책 동선과 묶기 좋습니다.",
+      "일정 사이 짧은 방문 코스로도 충분합니다."
     ]
   },
   {
-    name: "야경 좋은 루프탑",
-    category: "야외",
-    summary: "하루를 마무리하며 도시의 분위기를 느끼기 좋습니다. 짧게 다녀와도 만족도가 높은 코스입니다.",
-    bestTime: "저녁 7시 - 밤 9시",
-    goodFor: "퇴근 후, 데이트, 야경 감상",
-    vibe: "도시적인, 선선한, 분위기 있는",
-    highlight: "조명 켜지는 시간대가 가장 좋습니다.",
+    code: "AT4",
+    label: "관광명소",
+    summary: "오늘은 주변에서 바로 갈 수 있는 명확한 스팟 한 곳을 추천합니다. 짧은 외출 목적지로 적합합니다.",
     tips: [
-      "앉을 수 있는 자리가 있는지 먼저 확인하세요.",
-      "바람이 강한 날은 실내 좌석이 있는 곳이 더 안정적입니다.",
-      "짧게 1시간 정도만 잡아도 충분히 좋습니다."
-    ]
-  },
-  {
-    name: "브런치 맛집 골목",
-    category: "맛집",
-    summary: "기분 전환이 필요할 때 가장 간단하고 확실한 선택입니다. 음식과 산책을 같이 즐기기 좋습니다.",
-    bestTime: "오전 10시 - 오후 1시",
-    goodFor: "주말 시작, 친구 만남, 가벼운 외출",
-    vibe: "활기찬, 맛있는, 가벼운",
-    highlight: "웨이팅 전에 가면 훨씬 여유롭습니다.",
-    tips: [
-      "메인 메뉴 하나와 음료 하나 정도로 가볍게 시작하는 편이 좋습니다.",
-      "브런치 후 근처 편집숍이나 공원을 같이 묶어보세요.",
-      "사람 많은 시간대를 피하면 만족도가 크게 올라갑니다."
-    ]
-  },
-  {
-    name: "식물 가득한 온실 카페",
-    category: "감성",
-    summary: "멀리 떠나지 않아도 작은 여행 같은 기분을 내기 좋습니다. 초록이 많은 공간은 피로감을 줄여줍니다.",
-    bestTime: "오후 2시 - 오후 5시",
-    goodFor: "사진, 대화, 휴식",
-    vibe: "싱그러운, 따뜻한, 여유로운",
-    highlight: "햇빛이 드는 시간대 사진이 가장 잘 나옵니다.",
-    tips: [
-      "창가 자리를 원하면 비교적 이른 방문이 유리합니다.",
-      "대화 위주라면 소음이 적은 평일이 더 적합합니다.",
-      "오래 있기보다 60~90분 정도가 가장 만족스럽습니다."
+      "가볍게 이동해 사진이나 산책을 하기 좋습니다.",
+      "멀리 계획하지 않아도 오늘의 목적지가 분명해집니다.",
+      "도착 후 30분에서 1시간 정도만 써도 만족도가 높습니다."
     ]
   }
 ];
 
+const SEARCH_RADIUS_METERS = 3000;
+
 const elements = {
+  statusText: document.querySelector("#status-text"),
   dateText: document.querySelector("#date-text"),
   placeTag: document.querySelector("#place-tag"),
   placeName: document.querySelector("#place-name"),
   placeSummary: document.querySelector("#place-summary"),
-  bestTime: document.querySelector("#best-time"),
-  goodFor: document.querySelector("#good-for"),
-  vibe: document.querySelector("#vibe"),
-  highlight: document.querySelector("#highlight"),
+  placeAddress: document.querySelector("#place-address"),
+  placeDistance: document.querySelector("#place-distance"),
+  placeCategory: document.querySelector("#place-category"),
+  placePhone: document.querySelector("#place-phone"),
+  placeLink: document.querySelector("#place-link"),
   tipList: document.querySelector("#tip-list")
 };
 
@@ -103,10 +63,8 @@ function getTodaySeed() {
   return now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
 }
 
-function selectPlace() {
-  const index = getTodaySeed() % PLACES.length;
-
-  return PLACES[index];
+function setStatus(message) {
+  elements.statusText.textContent = message;
 }
 
 function renderTips(tips) {
@@ -119,8 +77,7 @@ function renderTips(tips) {
   });
 }
 
-function renderRecommendation() {
-  const pick = selectPlace();
+function renderDate() {
   const now = new Date();
 
   elements.dateText.textContent = now.toLocaleDateString("ko-KR", {
@@ -129,14 +86,182 @@ function renderRecommendation() {
     day: "numeric",
     weekday: "long"
   });
-  elements.placeTag.textContent = pick.category;
-  elements.placeName.textContent = pick.name;
-  elements.placeSummary.textContent = pick.summary;
-  elements.bestTime.textContent = pick.bestTime;
-  elements.goodFor.textContent = pick.goodFor;
-  elements.vibe.textContent = pick.vibe;
-  elements.highlight.textContent = pick.highlight;
-  renderTips(pick.tips);
 }
 
-renderRecommendation();
+function renderSetupState(message) {
+  renderDate();
+  elements.placeTag.textContent = "KAKAO SETUP";
+  elements.placeName.textContent = "Kakao JavaScript 키가 필요합니다";
+  elements.placeSummary.textContent = message;
+  elements.placeAddress.textContent = "config.js의 kakaoJavaScriptKey";
+  elements.placeDistance.textContent = "설정 후 자동 계산";
+  elements.placeCategory.textContent = "Kakao Places";
+  elements.placePhone.textContent = "키 설정 필요";
+  elements.placeLink.removeAttribute("href");
+  elements.placeLink.setAttribute("aria-disabled", "true");
+  elements.placeLink.textContent = "config.js에 키를 넣어주세요";
+  renderTips([
+    "Kakao Developers에서 JavaScript 키를 발급받아야 합니다.",
+    "config.js의 kakaoJavaScriptKey 값에 키를 넣으면 됩니다.",
+    "키를 넣은 뒤 페이지를 새로고침하면 근처 실제 장소 1곳을 찾습니다."
+  ]);
+  setStatus(message);
+}
+
+function loadKakaoSdk(key) {
+  return new Promise((resolve, reject) => {
+    if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+      resolve();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src =
+      "https://dapi.kakao.com/v2/maps/sdk.js?appkey=" +
+      encodeURIComponent(key) +
+      "&autoload=false&libraries=services";
+    script.onload = () => {
+      window.kakao.maps.load(resolve);
+    };
+    script.onerror = () => {
+      reject(new Error("Kakao SDK를 불러오지 못했습니다."));
+    };
+    document.head.appendChild(script);
+  });
+}
+
+function getCurrentPosition() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error("브라우저가 위치 정보를 지원하지 않습니다."));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 300000
+    });
+  });
+}
+
+function categorySearch(places, categoryCode, longitude, latitude) {
+  return new Promise((resolve, reject) => {
+    places.categorySearch(
+      categoryCode,
+      (data, status) => {
+        if (status === window.kakao.maps.services.Status.OK) {
+          resolve(data);
+          return;
+        }
+
+        if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
+          resolve([]);
+          return;
+        }
+
+        reject(new Error("Kakao Places 검색에 실패했습니다."));
+      },
+      {
+        location: new window.kakao.maps.LatLng(latitude, longitude),
+        radius: SEARCH_RADIUS_METERS,
+        sort: window.kakao.maps.services.SortBy.DISTANCE
+      }
+    );
+  });
+}
+
+async function findNearbyPlace(longitude, latitude) {
+  const places = new window.kakao.maps.services.Places();
+  const startIndex = getTodaySeed() % CATEGORY_ROTATION.length;
+
+  for (let offset = 0; offset < CATEGORY_ROTATION.length; offset += 1) {
+    const category = CATEGORY_ROTATION[(startIndex + offset) % CATEGORY_ROTATION.length];
+    const results = await categorySearch(places, category.code, longitude, latitude);
+
+    if (!results.length) {
+      continue;
+    }
+
+    const pickIndex = getTodaySeed() % Math.min(results.length, 5);
+
+    return {
+      category,
+      place: results[pickIndex]
+    };
+  }
+
+  throw new Error("주변 3km 안에서 추천할 장소를 찾지 못했습니다.");
+}
+
+function formatDistance(distance) {
+  const meters = Number(distance || 0);
+
+  if (!meters) {
+    return "거리 정보 없음";
+  }
+
+  if (meters >= 1000) {
+    return (meters / 1000).toFixed(1) + "km";
+  }
+
+  return meters + "m";
+}
+
+function buildKakaoMapLink(place) {
+  if (place.place_url) {
+    return place.place_url;
+  }
+
+  const query = encodeURIComponent(place.place_name);
+
+  return "https://map.kakao.com/link/search/" + query;
+}
+
+function renderPlace(recommendation) {
+  const { category, place } = recommendation;
+  const address = place.road_address_name || place.address_name || "주소 정보 없음";
+  const phone = place.phone || "전화번호 정보 없음";
+
+  renderDate();
+  elements.placeTag.textContent = "KAKAO " + category.label;
+  elements.placeName.textContent = place.place_name;
+  elements.placeSummary.textContent = category.summary;
+  elements.placeAddress.textContent = address;
+  elements.placeDistance.textContent = formatDistance(place.distance);
+  elements.placeCategory.textContent = place.category_name || category.label;
+  elements.placePhone.textContent = phone;
+  elements.placeLink.href = buildKakaoMapLink(place);
+  elements.placeLink.setAttribute("aria-disabled", "false");
+  elements.placeLink.textContent = "카카오맵에서 바로 열기";
+  renderTips(category.tips);
+  setStatus("현재 위치 기준 " + SEARCH_RADIUS_METERS / 1000 + "km 안에서 찾은 실제 장소입니다.");
+}
+
+async function initialize() {
+  const key = window.WHEREHERE_CONFIG && window.WHEREHERE_CONFIG.kakaoJavaScriptKey;
+
+  if (!key) {
+    renderSetupState("config.js에 Kakao JavaScript 키를 입력해야 실제 장소 검색이 동작합니다.");
+    return;
+  }
+
+  try {
+    setStatus("Kakao Places를 준비하고 있습니다.");
+    await loadKakaoSdk(key);
+
+    setStatus("현재 위치를 확인하고 있습니다.");
+    const position = await getCurrentPosition();
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+
+    setStatus("근처 실제 장소 한 곳을 찾고 있습니다.");
+    const recommendation = await findNearbyPlace(longitude, latitude);
+
+    renderPlace(recommendation);
+  } catch (error) {
+    renderSetupState(error.message);
+  }
+}
+
+initialize();

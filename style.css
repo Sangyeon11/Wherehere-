@@ -91,6 +91,13 @@ button {
   color: var(--muted);
 }
 
+.status-text {
+  margin: 18px 0 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--brand-deep);
+}
+
 .recommendation-panel {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
@@ -137,6 +144,23 @@ button {
   font-size: 1rem;
   line-height: 1.75;
   color: var(--muted);
+}
+
+.place-link {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 18px;
+  padding: 11px 15px;
+  border-radius: 999px;
+  font-weight: 700;
+  color: #f7fff8;
+  text-decoration: none;
+  background: linear-gradient(135deg, var(--brand), var(--brand-deep));
+}
+
+.place-link[aria-disabled="true"] {
+  pointer-events: none;
+  opacity: 0.6;
 }
 
 .detail-grid {
