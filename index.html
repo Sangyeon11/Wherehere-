@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;600;700;800&family=Noto+Serif+KR:wght@500;600;700&display=swap"
     rel="stylesheet"
   />
   <link href="./style.css" rel="stylesheet" />
@@ -20,7 +20,10 @@
     <header class="topbar">
       <div>
         <p class="eyebrow">WHEREHERE LOCAL</p>
-        <h1 class="brand">오늘의 장소에서 동네 커뮤니티까지</h1>
+        <h1 class="brand">
+          <span class="keep-phrase">오늘의 장소 추천부터</span>
+          <span class="keep-phrase">동네 커뮤니티 흐름까지</span>
+        </h1>
       </div>
       <div class="topbar-actions">
         <button class="theme-toggle" id="theme-toggle-button" type="button">라이트 모드</button>
@@ -41,10 +44,14 @@
       <section class="hero-grid">
         <section class="hero-card">
           <p class="eyebrow">LOCAL SOCIAL APP</p>
-          <h2>복잡한 한 페이지 대신, 홈부터 피드까지 흐름을 나눴습니다.</h2>
+          <h2>
+            <span class="keep-phrase">복잡하게 한 화면에 쌓지 않고,</span>
+            <span class="keep-phrase">홈부터 피드까지 흐름을 분리했습니다.</span>
+          </h2>
           <p class="hero-copy">
-            오늘의 장소, 동네 상태, 게시글 작성, 실제 피드를 한 화면에 몰아두지 않고
-            섹션별로 나눠서 더 읽기 쉽게 정리했습니다. 기능은 그대로 유지됩니다.
+            오늘의 장소 확인, 동네 분위기 파악, 게시글 작성, 실제 피드 탐색을 각각
+            독립된 섹션으로 나눠 시선이 한 번에 흩어지지 않도록 정리했습니다.
+            필요한 정보는 더 자세히 보여주되, 읽는 흐름은 훨씬 단정하게 유지됩니다.
           </p>
           <div class="hero-actions">
             <button class="ghost-button" id="share-place-button" type="button">현재 장소 공유</button>
@@ -65,10 +72,10 @@
           </div>
           <button class="kakao-login-btn" id="kakao-login-button" type="button" disabled>카카오 로그인 준비 중</button>
           <p class="auth-status" id="login-status">카카오 인증 상태를 확인하는 중입니다.</p>
-          <p class="auth-detail" id="login-detail">로그인 후 작성한 게시글과 댓글의 작성자명이 카카오 프로필 기준으로 채워집니다.</p>
+          <p class="auth-detail" id="login-detail">로그인 후에는 게시글, 댓글, 공유 카드의 작성자명이 카카오 프로필 기준으로 자동 반영됩니다.</p>
           <div class="profile-box">
             <strong id="profile-name">게스트 모드</strong>
-            <span id="profile-meta">동네 피드는 로그인 없이도 미리 볼 수 있습니다.</span>
+            <span id="profile-meta">로그인 전에도 피드는 둘러볼 수 있고, 로그인하면 바로 참여할 수 있습니다.</span>
           </div>
         </aside>
       </section>
@@ -110,8 +117,11 @@
             <p class="eyebrow">NEIGHBORHOOD PULSE</p>
             <span class="tiny-pill" id="local-area">동네 확인 중</span>
           </div>
-          <h3 id="area-title">내 주변 사람들과 바로 이어지는 로컬 피드</h3>
-          <p class="area-copy" id="area-summary">주변 장소가 확정되면 동네 이름과 함께 로컬 피드 상태를 요약해 보여줍니다.</p>
+          <h3 id="area-title">
+            <span class="keep-phrase">내 주변 동네의 흐름을</span>
+            <span class="keep-phrase">한눈에 보는 로컬 피드</span>
+          </h3>
+          <p class="area-copy" id="area-summary">주변 장소가 확정되면 동네 이름, 게시글 수, 모임 분위기를 함께 묶어 더 구체적으로 안내합니다.</p>
           <div class="metric-grid">
             <div class="metric-card">
               <span>오늘 게시글</span>
@@ -165,16 +175,16 @@
             </div>
             <label>
               <span>제목</span>
-              <input id="post-title" type="text" maxlength="80" placeholder="예: 오늘 저녁 근처에서 같이 달릴 사람?" required />
+              <input id="post-title" type="text" maxlength="80" placeholder="예: 오늘 저녁 8시에 한강 쪽 같이 달리실 분 있을까요?" required />
             </label>
             <label>
               <span>내용</span>
-              <textarea id="post-body" rows="5" maxlength="600" placeholder="동네 정보, 리뷰, 모임 공지, 후기 등을 자유롭게 적어보세요." required></textarea>
+              <textarea id="post-body" rows="5" maxlength="600" placeholder="장소 분위기, 추천 이유, 모임 목적, 준비물처럼 실제로 도움이 되는 정보를 자세히 적어보세요." required></textarea>
             </label>
             <div class="field-row">
               <label>
                 <span>모임 시간</span>
-                <input id="post-time" type="text" maxlength="40" placeholder="예: 오늘 8시 / 토요일 오전 10시" />
+                <input id="post-time" type="text" maxlength="40" placeholder="예: 오늘 오후 8시 / 토요일 오전 10시 30분" />
               </label>
               <label>
                 <span>사진 업로드</span>
@@ -211,7 +221,10 @@
         <div class="feed-head">
           <div>
             <p class="eyebrow">NEIGHBOR FEED</p>
-            <h2>동네 생활 피드</h2>
+            <h2>
+              <span class="keep-phrase">지금 이 동네에서</span>
+              <span class="keep-phrase">오가는 이야기</span>
+            </h2>
           </div>
           <span class="tiny-pill" id="feed-summary">0개 게시글</span>
         </div>

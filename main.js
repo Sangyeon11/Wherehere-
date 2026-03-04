@@ -1,8 +1,8 @@
 const CATEGORY_ROTATION = [
-  { code: "CE7", label: "카페", summary: "지금 가장 빠르게 들를 수 있는 로컬 카페 한 곳을 추천합니다." },
-  { code: "FD6", label: "음식점", summary: "오늘 동네에서 바로 갈 수 있는 식사 장소 한 곳입니다." },
-  { code: "CT1", label: "문화시설", summary: "잠깐 머물러도 기분 전환이 되는 동네 문화시설 한 곳입니다." },
-  { code: "AT4", label: "관광명소", summary: "오늘의 이동 목적지가 될 만한 주변 스팟 한 곳입니다." }
+  { code: "CE7", label: "카페", summary: "지금 잠깐 들르기 좋고 대화나 작업을 이어가기 편한 로컬 카페를 골랐습니다." },
+  { code: "FD6", label: "음식점", summary: "오늘 동네에서 바로 방문해 식사하기 좋은 음식점을 기준으로 연결했습니다." },
+  { code: "CT1", label: "문화시설", summary: "짧게 머물러도 분위기를 바꾸기 좋은 동네 문화시설을 우선으로 추천합니다." },
+  { code: "AT4", label: "관광명소", summary: "가볍게 이동해 둘러보기 좋고 오늘의 동선에 자연스럽게 얹히는 스팟입니다." }
 ];
 
 const SEARCH_RADIUS_METERS = 3000;
@@ -233,7 +233,7 @@ function setProfile(user) {
     sessionStorage.removeItem(SESSION_KEY);
     el.profileChip.textContent = "로그인 대기";
     el.profileName.textContent = "게스트 모드";
-    el.profileMeta.textContent = "로그인하면 작성자명이 카카오 프로필 기준으로 채워집니다.";
+    el.profileMeta.textContent = "피드는 둘러볼 수 있고, 로그인하면 작성자 정보와 공유 문구가 자동으로 채워집니다.";
     return;
   }
   try {
@@ -286,8 +286,9 @@ async function createCommentOnApi(payload) {
 function updateAreaSummary() {
   const total = state.posts.length;
   const gatherings = state.posts.filter((post) => post.type === "gathering").length;
-  el.areaTitle.textContent = state.localAreaName + "에서 지금 살아있는 동네 분위기";
-  el.areaSummary.textContent = "실제 피드 기준 " + total + "개의 글과 " + gatherings + "개의 모임 글이 열려 있습니다.";
+  el.areaTitle.textContent = state.localAreaName + "에서 지금 이어지는 동네 이야기";
+  el.areaSummary.textContent =
+    "실제 피드 기준 게시글 " + total + "개가 올라와 있고, 그중 모임 글은 " + gatherings + "개입니다. 지금 참여할 흐름을 바로 확인할 수 있습니다.";
   el.localArea.textContent = state.localAreaName;
 }
 
@@ -313,25 +314,25 @@ function renderMiniLists() {
       <article class="mini-item">
         <strong>${escapeHtml(post.title)}</strong>
         <span>${escapeHtml(post.meet_time || "시간 미정")} · ${escapeHtml(post.author)}</span>
-        <p>${escapeHtml((post.body || "").slice(0, 70))}</p>
+        <p>${escapeHtml((post.body || "").slice(0, 92))}</p>
       </article>
     `).join("")
-    : '<div class="empty-state">아직 열린 모임이 없습니다.</div>';
+    : '<div class="empty-state">아직 열린 모임이 없습니다. 첫 제안을 올려 동네 흐름을 만들어보세요.</div>';
 
   el.reviewList.innerHTML = reviews.length
     ? reviews.map((post) => `
       <article class="mini-item">
         <strong>${escapeHtml(post.title)}</strong>
         <span>평점 ${Number(post.rating).toFixed(1)} / 5 · ${escapeHtml(post.author)}</span>
-        <p>${escapeHtml((post.body || "").slice(0, 70))}</p>
+        <p>${escapeHtml((post.body || "").slice(0, 92))}</p>
       </article>
     `).join("")
-    : '<div class="empty-state">아직 리뷰가 없습니다.</div>';
+    : '<div class="empty-state">아직 리뷰가 없습니다. 방문한 장소의 분위기를 먼저 남겨보세요.</div>';
 }
 
 function renderFeed() {
   if (!state.posts.length) {
-    el.feedList.innerHTML = '<div class="empty-state">아직 게시글이 없습니다. 첫 글을 작성해보세요.</div>';
+    el.feedList.innerHTML = '<div class="empty-state">아직 게시글이 없습니다. 동네 정보나 모임 제안을 첫 글로 남겨보세요.</div>';
     renderMetrics();
     renderMiniLists();
     updateAreaSummary();
@@ -375,7 +376,7 @@ function renderFeed() {
         <div class="comments-wrap">
           ${commentsHtml}
           <div class="comment-form-row">
-            <input data-comment-input="${post.id}" type="text" maxlength="160" placeholder="댓글을 남겨보세요." />
+            <input data-comment-input="${post.id}" type="text" maxlength="160" placeholder="짧은 후기나 참여 의사를 남겨보세요." />
             <button class="action-button" data-comment-submit="${post.id}" type="button">댓글 등록</button>
           </div>
         </div>
@@ -480,7 +481,7 @@ async function drawStoryCard(options) {
   ctx.fillStyle = gradient;
   ctx.fillRect(60, 80, canvas.width - 120, 8);
   ctx.fillStyle = "#f3f7fb";
-  ctx.font = "700 54px Outfit";
+  ctx.font = '700 54px "Noto Sans KR"';
   ctx.fillText("WHEREHERE", 80, 180);
 
   let currentY = 260;
@@ -494,29 +495,29 @@ async function drawStoryCard(options) {
     currentY += 620;
   }
 
-  ctx.font = "italic 82px Instrument Serif";
+  ctx.font = '600 82px "Noto Serif KR"';
   const titleLines = wrapCanvasText(ctx, options.title, 80, currentY, 920, 94, 3);
   currentY += titleLines * 94 + 40;
 
-  ctx.font = "400 40px Outfit";
+  ctx.font = '400 40px "Noto Sans KR"';
   ctx.fillStyle = "#b8c6d5";
   const bodyLines = wrapCanvasText(ctx, options.body, 80, currentY, 900, 60, 5);
   currentY += bodyLines * 60 + 24;
 
   if (options.placeLine) {
     ctx.fillStyle = "#ffbe5c";
-    ctx.font = "600 34px Outfit";
+    ctx.font = '600 34px "Noto Sans KR"';
     const placeLines = wrapCanvasText(ctx, options.placeLine, 80, currentY, 900, 48, 2);
     currentY += placeLines * 48 + 32;
   }
 
   if (options.commentLines && options.commentLines.length) {
     ctx.fillStyle = "#f3f7fb";
-    ctx.font = "700 30px Outfit";
+    ctx.font = '700 30px "Noto Sans KR"';
     ctx.fillText("실제 댓글", 80, currentY);
     currentY += 48;
     ctx.fillStyle = "#b8c6d5";
-    ctx.font = "400 28px Outfit";
+    ctx.font = '400 28px "Noto Sans KR"';
     options.commentLines.slice(0, 2).forEach((line) => {
       const lines = wrapCanvasText(ctx, "• " + line, 80, currentY, 900, 40, 2);
       currentY += lines * 40 + 16;
@@ -524,22 +525,31 @@ async function drawStoryCard(options) {
   }
 
   ctx.fillStyle = "#ffbe5c";
-  ctx.font = "600 38px Outfit";
+  ctx.font = '600 38px "Noto Sans KR"';
   ctx.fillText("공유하고 인스타그램에서 바로 올려보세요", 80, 1680);
   ctx.fillStyle = "#f3f7fb";
-  ctx.font = "500 28px Outfit";
+  ctx.font = '500 28px "Noto Sans KR"';
   wrapCanvasText(ctx, getAppBaseUrl(), 80, 1740, 900, 38, 2);
   return canvas;
 }
 
 function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines = Infinity) {
-  const words = String(text).split(" ");
+  const source = String(text);
+  const segmenter = typeof Intl !== "undefined" && Intl.Segmenter
+    ? new Intl.Segmenter("ko", { granularity: "word" })
+    : null;
+  const words = segmenter
+    ? Array.from(segmenter.segment(source))
+      .map((part) => part.segment)
+      .filter((part) => part.trim())
+    : source.split(/\s+/).filter(Boolean);
   let line = "";
   let offsetY = y;
   let count = 0;
   words.forEach((word) => {
     if (count >= maxLines) return;
-    const test = line ? line + " " + word : word;
+    const spacer = line && !/^[,.:!?)]/.test(word) ? " " : "";
+    const test = line ? line + spacer + word : word;
     if (ctx.measureText(test).width > maxWidth && line) {
       ctx.fillText(line, x, offsetY);
       line = word;
@@ -809,26 +819,27 @@ function deriveAreaName(place) {
 
 function renderPlace(recommendation) {
   const { category, place } = recommendation;
+  const distanceText = formatDistance(place.distance);
   state.currentPlace = place;
   state.localAreaName = deriveAreaName(place);
   renderDate();
   el.placeTag.textContent = "TODAY · " + category.label;
   el.placeName.textContent = place.place_name;
-  el.placeSummary.textContent = category.summary;
+  el.placeSummary.textContent = category.summary + " 현재 위치에서 " + distanceText + " 거리라서 바로 이동하거나 약속 장소로 잡기 좋습니다.";
   el.placeAddress.textContent = place.road_address_name || place.address_name || "주소 정보 없음";
-  el.placeDistance.textContent = formatDistance(place.distance);
+  el.placeDistance.textContent = distanceText;
   el.placeCategory.textContent = place.category_name || category.label;
   el.placePhone.textContent = place.phone || "전화번호 정보 없음";
   el.placeLink.href = buildKakaoMapLink(place);
   updateAreaSummary();
-  setStatus("주변 장소와 실제 피드를 연결했습니다.", "done");
+  setStatus("주변 장소와 동네 피드 연결을 마쳤습니다.", "done");
 }
 
 function renderPlaceError(error) {
   renderDate();
   el.placeTag.textContent = "PLACE ERROR";
   el.placeName.textContent = error.title || "주변 장소를 불러오지 못했습니다";
-  el.placeSummary.textContent = error.message || "위치/지도 설정을 확인하세요.";
+  el.placeSummary.textContent = error.message || "위치 권한 또는 지도 설정을 확인한 뒤 다시 시도해보세요.";
   el.placeAddress.textContent = "오류 상태";
   el.placeDistance.textContent = "-";
   el.placeCategory.textContent = "진단 필요";
@@ -843,7 +854,7 @@ async function refreshFeed() {
     await loadFeedFromApi();
     renderFeed();
   } catch (error) {
-    el.feedList.innerHTML = '<div class="empty-state">' + escapeHtml(error.message || "실제 피드를 불러오지 못했습니다.") + "</div>";
+    el.feedList.innerHTML = '<div class="empty-state">' + escapeHtml(error.message || "실제 피드를 불러오지 못했습니다. 잠시 후 다시 새로고침해보세요.") + "</div>";
     renderMetrics();
     renderMiniLists();
   }

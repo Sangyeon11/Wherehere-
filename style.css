@@ -1,5 +1,8 @@
 :root {
   color-scheme: dark;
+  --font-ui: "Noto Sans KR", sans-serif;
+  --font-display: "Noto Serif KR", serif;
+  --font-mono: "IBM Plex Mono", monospace;
   --bg: #09121b;
   --bg-alt: #0e1823;
   --panel: rgba(16, 26, 36, 0.9);
@@ -47,7 +50,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: "Outfit", sans-serif;
+  font-family: var(--font-ui);
   color: var(--text);
   background:
     radial-gradient(circle at 12% 18%, rgba(255, 190, 92, 0.08), transparent 25%),
@@ -136,7 +139,7 @@ a {
 
 .eyebrow {
   margin: 0;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 0.74rem;
   letter-spacing: 0.16em;
   color: var(--accent);
@@ -148,13 +151,22 @@ a {
 .panel h3,
 .feed-head h2 {
   margin: 10px 0 0;
-  font-family: "Instrument Serif", serif;
-  font-weight: 400;
-  line-height: 0.98;
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 
 .brand {
   font-size: clamp(2rem, 5vw, 3.6rem);
+  max-width: 15ch;
+  text-wrap: balance;
+}
+
+.keep-phrase {
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .theme-toggle,
@@ -254,6 +266,7 @@ a {
 
 .hero-card h2 {
   font-size: clamp(2rem, 4.3vw, 4rem);
+  max-width: 13ch;
 }
 
 .hero-copy,
@@ -267,8 +280,71 @@ a {
 .mini-item p,
 .profile-box span {
   margin: 14px 0 0;
+  font-size: 0.98rem;
   line-height: 1.7;
+  letter-spacing: -0.01em;
   color: var(--muted);
+}
+
+.brand,
+.hero-card h2,
+.hero-copy,
+.auth-detail,
+.auth-status,
+.place-copy,
+.area-copy,
+.post-title,
+.post-content,
+.comment-text,
+.review-line,
+.mini-item p,
+.profile-box span,
+.detail-card strong,
+.metric-card strong,
+.status-pill,
+.tiny-pill,
+.share-debug-line {
+  word-break: keep-all;
+  overflow-wrap: normal;
+  text-wrap: pretty;
+  line-break: strict;
+}
+
+.hero-copy,
+.auth-detail,
+.auth-status,
+.place-copy,
+.area-copy {
+  max-width: 38ch;
+}
+
+.topbar > div:first-child,
+.feed-head > div,
+.panel-head + h3 {
+  min-width: 0;
+}
+
+.status-pill,
+.tiny-pill,
+.post-meta,
+.comment-meta {
+  white-space: nowrap;
+}
+
+.place-copy,
+.area-copy,
+.post-content,
+.comment-text,
+.mini-item p {
+  text-wrap: pretty;
+}
+
+.post-content {
+  max-width: 62ch;
+}
+
+.mini-item p {
+  max-width: 30ch;
 }
 
 .hero-actions {
@@ -354,7 +430,7 @@ a {
 
 .place-badge {
   margin: 0;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   letter-spacing: 0.16em;
   color: var(--accent);
@@ -517,6 +593,7 @@ textarea:focus {
 .post-title {
   margin: 12px 0 0;
   font-size: 1.25rem;
+  line-height: 1.45;
 }
 
 .post-image {
@@ -633,5 +710,31 @@ textarea:focus {
   .primary-link,
   .tab-button {
     width: 100%;
+  }
+
+  .keep-phrase {
+    white-space: normal;
+  }
+
+  .brand,
+  .hero-card h2,
+  .hero-copy,
+  .auth-detail,
+  .auth-status,
+  .place-copy,
+  .area-copy {
+    max-width: none;
+  }
+
+  .status-pill,
+  .tiny-pill,
+  .post-meta,
+  .comment-meta {
+    white-space: normal;
+  }
+
+  .post-content,
+  .mini-item p {
+    max-width: none;
   }
 }
